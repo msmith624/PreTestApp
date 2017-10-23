@@ -11,5 +11,9 @@
 */
 
 .statusbar-overlay {
-    background: #000000;
+    background: rgba(247, 247, 248, .96);
 }
+body {
+    background-color: rgba(106, 106, 106, 0.82)
+}
+
