@@ -1,36 +1,29 @@
+# Framework7 PhoneGap Application 
 
-You can use the [editor on GitHub](https://github.com/MillerWilson/PTA/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+> [Framework7](http://www.idangero.us/framework7) is a Mobile UI framework that can be used to build hybrid apps with PhoneGap. This template allows you to get started using Framework7 
+  quickly. 
+  
+  For a more extensive Framework7 sample, see the [one included in their Github project](https://github.com/nolimits4web/Framework7/tree/master/dist)
+  or the [demo apps on their website](http://www.idangero.us/framework7/apps/#.VpQCc5MrKjQ).
+    
+  Also, for an intro to Framework7, check out [this post on the PhoneGap blog](http://phonegap.com/blog/2015/11/30/framework7/).   
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
-### Markdown
+## Usage
+    
+### PhoneGap CLI
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+    $ phonegap create my-app --template phonegap-template-framework7
 
-```markdown
-Syntax highlighted code block
+### Cordova CLI
 
-# Header 1
-## Header 2
-### Header 3
+    $ cordova create my-app --template phonegap-template-framework7
+    
+### Desktop
 
-- Bulleted
-- List
+In your browser, open the file:
 
-1. Numbered
-2. List
+    /www/index.html
 
-**Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/MillerWilson/PTA/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+  
