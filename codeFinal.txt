@@ -1,0 +1,655 @@
+using Otter;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Diagnostics;
+
+
+namespace otterConversion
+{
+    class Program
+    {
+        public const int gamesizeX = 320;
+        public const int gamesizeY = 480;
+        // The grid size to use for the Tilemap.
+        public static int gridx = 180;
+        public static int gridy = 396;
+        public static int blockSize = 18;
+        // set up the play grid
+
+        static void Main(string[] args)
+        {
+            int[,] gameGrid = new int[10, 20];
+            for (int i = 0; i < 10; ++i)
+            {
+                for (int x = 0; x < 20; ++x)
+                {
+                    gameGrid[i, x] = 0;
+                }
+            }
+            // Create a Game.
+            var game = new Game("Tilemap Example", gamesizeX, gamesizeY, 60);
+
+            // Create a Scene.
+            var scene = new Scene();
+            // Add the Tiles Entity to the Scene.
+            scene.Add(new Background());
+
+            //  scene.Add(new Tiles());
+            scene.Add(new DropTile(ref gameGrid));
+
+
+            // Set the mouse visibility to true for this example.
+            game.MouseVisible = true;
+
+            // Start the Game.
+            game.Start(scene);
+        }
+        class DropTile : Entity
+        {
+            // The Tilemap Graphic to use for rendering tiles.
+            public Tilemap drop;
+            public Tilemap gameTiles;
+            Random rand = new Random();
+            //set the timer
+            Stopwatch clock = new Stopwatch();
+            //value to track rotation
+            int[,] grida;
+            
+            int blockStrtRow1 = 0;
+            int blocksToRight = 0;
+            int blockStrtRow2 = 0;
+            int blocksRightRow2 = 0;
+            int blockStrtRow3 = 0;
+            int blocksRightRow3 = 0;
+            int map;
+            
+
+            int currentColor;
+          
+            public DropTile(ref int[,] gridb) : base()
+            {
+                // Create the Tilemap the size of the game window using the defined grid size.
+                drop = new Tilemap("c:\\users\\calvin\\documents\\visual studio 2017\\Projects\\otterConversion\\otterConversion\\obj\\images\\tiles.png", gridx, gridy, blockSize, blockSize);
+                gameTiles = new Tilemap("c:\\users\\calvin\\documents\\visual studio 2017\\Projects\\otterConversion\\otterConversion\\obj\\images\\tiles.png", gridx, gridy, blockSize, blockSize);
+                // Add the Tilemap to the list of Graphics to render.
+                //position the tile in relation to the game
+                drop.SetOrigin(-28, 5);
+                gameTiles.SetOrigin(-28, -31);
+                topofTheMorning();
+                AddGraphic(drop);
+                AddGraphic(gameTiles);
+                grida = gridb;
+              
+                gameTiles.SetTile(0,19, currentColor);
+                //gameTiles.SetTile(point1 + 1, point2 + 2, currentColor);
+                //gameTiles.SetTile(point1 + 2, point2 + 2, currentColor);
+                //gameTiles.SetTile(point1 + 1, point2 + 3, currentColor);
+
+
+                //start the clock for the drop
+                //drop.SetTile(0,21, 0);
+                clock.Start();
+            }
+
+            public override void Update()
+            {
+
+                base.Update();
+                if (Input.KeyPressed(Key.Down))
+                {
+                    moveItDown();
+                }
+                if (Input.KeyPressed(Key.Up))
+                {
+                    if (freetoTurn())
+                    {
+                        ++map;
+                        if (map > 4)
+                            map = 1;
+                        setThePattern();
+                    }
+                   // stopDaBlock();
+                }
+                if (Input.KeyPressed(Key.Left))
+                {
+                    if (freetomoveLeft())
+                        drop.X -= blockSize;
+                }
+                if (Input.KeyPressed(Key.Right))
+                {
+                    if (freetomoveRight())
+                        drop.X += blockSize;
+                }
+                if (Input.KeyPressed(Key.W))
+                {
+                    stopDaBlock();
+                }
+
+                if (clock.ElapsedMilliseconds / 1000 >= 2)
+                {
+                    moveItDown();
+                    clock.Restart();
+                }
+
+
+            }
+
+            bool freetomoveDown()
+            {
+                int p2 = ((int)drop.Y / blockSize);
+                int p1 = (int)drop.X / blockSize;
+                if (p2 < 0)
+                    p2 = 0;
+
+                try
+                {
+
+                    if ( blockStrtRow3 == 0||grida[p1 + (blockStrtRow3-1), p2 + 3] == 0 && grida[p1 + (blockStrtRow3-1) + blocksRightRow3, p2 + 3] == 0)
+                    {
+                        
+
+                        if (blockStrtRow2 ==0|| grida[p1 + (blockStrtRow2 - 1), p2 + 2] == 0 && grida[p1 + (blockStrtRow2 - 1) + blocksRightRow2, p2 + 2] == 0)
+                        {
+                           
+                            if (blockStrtRow1 == 0|| grida[p1 +(blockStrtRow1-1), p2 + 1] == 0)
+                            {
+                                
+                                if (blocksToRight == 0 ||grida[p1 + blocksToRight, p2 + 1] == 0)
+                                    return true;
+                                else
+                                    return false;
+                            }
+                            else
+                            {
+
+                                return false;
+                            }
+
+
+
+                        }
+                        else
+                        {
+                            
+                            return false;
+                        }
+                    }
+                    else
+                        {
+                            return false;
+                        }
+                }
+                catch (Exception)
+                {
+
+                    //Console.WriteLine("the array is " + (int)drop.X / 18 + "by " + ((int)drop.Y / 18+1));
+                    return false;
+                }
+
+            }
+            bool freetomoveLeft()
+            {
+                try
+                {
+                    if (blockStrtRow1 ==0|| grida[((int)drop.X / blockSize)+(blockStrtRow1 - 2), (int)drop.Y / blockSize] == 0)
+                    {
+                        
+                        if (blockStrtRow2 ==0|| grida[((int)drop.X / blockSize)+blockStrtRow2 - 2, (int)drop.Y / blockSize+1] == 0)
+                        {
+                           
+                            if (blockStrtRow3 > 0)
+                            {
+                                if (grida[((int)drop.X / blockSize) - 2 + blockStrtRow3, (int)drop.Y / blockSize + 2] == 0)
+                                    return true;
+                                else
+                                    return false;
+                            }
+                            else return true;
+                        }
+                        else return false;
+                    }
+                    else return false;
+                }
+                catch (Exception)
+                {
+                    //Console.WriteLine("the array is " + (((int)drop.X / 18) - 1) + "by " + (int)drop.Y / 18);
+                    return false;
+                }
+            }
+            bool freetomoveRight()
+            {
+                try
+                {
+                    if (blockStrtRow1 == 0||  grida[((int)drop.X / blockSize) + (blockStrtRow1 -1) + blocksToRight+1, (int)drop.Y / blockSize] == 0)
+                    {
+                        if (blockStrtRow2 == 0 || grida[((int)drop.X / blockSize) + (blockStrtRow2 -1)+ blocksRightRow2 +1, (int)drop.Y / blockSize + 1] == 0)
+                        {
+                            if (blockStrtRow3 > 0)
+                            {
+                                if (grida[((int)drop.X / blockSize)  + (blockStrtRow3-1) + blocksRightRow3 +1, (int)drop.Y / blockSize + 2] == 0)
+                                    return true;
+                                else
+                                    return false;
+                            }
+                            else return true;
+                        }
+                        else return false;
+                    }
+                    else return false;
+                }
+                catch (Exception)
+                {
+                    //Console.WriteLine("the array is " + (((int)drop.X / 18) + 1) + "by " + (int)drop.Y / 18);
+                    return false;
+                }
+            }
+
+            void moveItDown()
+            {
+                if (freetomoveDown())
+                    drop.Y += blockSize;
+                else
+                    stopDaBlock();
+            }
+
+            //stops the block and pins the block on the grid.
+            void stopDaBlock()
+            {
+                Console.WriteLine("this is x" + (double)drop.X + "This is y" + drop.Y);
+                Console.WriteLine("the array is " + ((int)drop.X / blockSize) + "by " + (int)drop.Y / blockSize);
+
+                /* int point1 = (int)drop.X / blockSize;
+                 int point2 = (int)drop.Y / blockSize;
+                 grida[point1, point2] = 1;
+                 gameTiles.SetTile(point1, point2, currentColor);
+                */
+               pinBlockwithPattern();
+                topofTheMorning();
+
+
+
+            }
+            //clears the blocks and resets the drop
+            void topofTheMorning()
+            {
+                currentColor = 2; //rand.Next(7);
+                map = 2;
+
+                  setThePattern();
+                drop.SetPosition(72, 0);
+              
+               // drop.SetTile(0, 2, currentColor);
+
+
+            }
+            void setThePattern()
+            {
+                switch (currentColor)
+                {
+                    case 1:                       
+                        switch (map)
+                        {
+                            case 1:
+                                {
+                                    drop.ClearAll();
+                                    blockStrtRow1 = 1;
+                                    blocksToRight = 2;
+                                    blockStrtRow2 = 2;
+                                    blocksRightRow2 = 0;
+                                    blockStrtRow3 = 0;
+                                    blocksRightRow3 = 0;
+
+
+
+                                    drop.SetTile(0, 2, currentColor);
+                                    drop.SetTile(1, 2, currentColor);
+                                    drop.SetTile(2, 2, currentColor);
+                                    drop.SetTile(1, 3, currentColor);
+
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    drop.ClearAll();
+
+                                    blockStrtRow1 = 3;
+                                    blocksToRight = 0;
+                                    blockStrtRow2 = 2;
+                                    blocksRightRow2 = 1;
+                                    blockStrtRow3 = 3;
+                                    blocksRightRow3 = 0;
+
+
+
+                                    drop.SetTile(2, 3, currentColor);
+                                    drop.SetTile(2, 4, currentColor);
+                                    drop.SetTile(2, 2, currentColor);
+                                    drop.SetTile(1, 3, currentColor);
+
+                                    break;
+                                }
+                            case 3:
+
+                                {
+
+                                    drop.ClearAll();
+
+                                    blockStrtRow1 = 1;
+                                    blocksToRight = 0;
+                                    blockStrtRow2 = 1;
+                                    blocksRightRow2 = 1;
+                                    blockStrtRow3 = 1;
+                                    blocksRightRow3 = 0;
+
+
+
+                                    drop.SetTile(0, 3, currentColor);
+                                    drop.SetTile(0, 4, currentColor);
+                                    drop.SetTile(0, 2, currentColor);
+                                    drop.SetTile(1, 3, currentColor);
+
+                                    break;
+                                }
+                            default:
+                                {
+                                    drop.ClearAll();
+                                    blockStrtRow1 = 0;
+                                    blocksToRight = 0;
+                                    blockStrtRow2 = 2;
+                                    blocksRightRow2 = 0;
+                                    blockStrtRow3 = 1;
+                                    blocksRightRow3 = 2;
+
+
+
+                                    drop.SetTile(0, 4, currentColor);
+                                    drop.SetTile(1, 4, currentColor);
+                                    drop.SetTile(2, 4, currentColor);
+                                    drop.SetTile(1, 3, currentColor);
+                                    break;
+                                }
+                        }
+                        break;
+
+                    case 2:
+                        {
+                            switch(map)
+                            {
+                                case 1:
+                                    {
+                                        drop.ClearAll();
+                                        blockStrtRow1 = 1;
+                                        blocksToRight = 0;
+                                        blockStrtRow2 = 1;
+                                        blocksRightRow2 = 0;
+                                        blockStrtRow3 = 1;
+                                        blocksRightRow3 = 0;
+
+
+
+                                        drop.SetTile(0, 2, currentColor);
+                                        drop.SetTile(0, 3, currentColor);
+                                        drop.SetTile(0, 4, currentColor);
+
+
+                                        break;
+                                    }
+                                case 2:
+                                    {
+                                        drop.ClearAll();
+                                        blockStrtRow1 = 1;
+                                        blocksToRight = 2;
+                                        blockStrtRow2 = 0;
+                                        blocksRightRow2 = 0;
+                                        blockStrtRow3 = 0;
+                                        blocksRightRow3 = 0;
+
+
+
+                                        drop.SetTile(0, 2, currentColor);
+                                        drop.SetTile(1, 2, currentColor);
+                                        drop.SetTile(2, 2, currentColor);
+
+
+                                        break;
+                                    }
+                                case 3:
+
+                                    break;
+
+                                case 4:
+
+                                    break;
+
+
+
+                            }
+
+
+                        }
+
+                        break;
+                    case 3:
+
+
+                        break;
+                    case 4:
+
+
+                        break;
+                    case 5:
+
+
+                        break;
+                    case 6:
+
+
+                        break;
+                    case 7:
+
+
+                        break;
+                    default:
+
+                        break;
+                }
+
+            }
+
+            void pinBlockwithPattern()
+            {
+                int point1 = (int)drop.X / blockSize;
+                int point2 = (int)drop.Y / blockSize;
+
+                switch (currentColor)
+                {
+                    case 1:
+                        switch (map)
+                        {
+                            case 1:
+                                {
+
+
+                                    grida[point1, point2] = 1;
+                                    grida[point1 + 1, point2] = 1;
+                                    grida[point1 + 2, point2] = 1;
+                                    grida[point1 + 1, point2 + 1] = 1;
+                                    gameTiles.SetTile(point1, point2, currentColor);
+                                    gameTiles.SetTile(point1 + 1, point2, currentColor);
+                                    gameTiles.SetTile(point1 + 2, point2, currentColor);
+                                    gameTiles.SetTile(point1 + 1, point2 + 1, currentColor);
+
+                                    topofTheMorning();
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    grida[point1 + 2, point2] = 1;
+                                    grida[point1 + 2, point2 + 1] = 1;
+                                    grida[point1 + 2, point2 + 2] = 1;
+                                    grida[point1 + 1, point2 + 1] = 1;
+                                    gameTiles.SetTile(point1 + 2, point2, currentColor);
+                                    gameTiles.SetTile(point1 + 2, point2 + 1, currentColor);
+                                    gameTiles.SetTile(point1 + 2, point2 + 2, currentColor);
+                                    gameTiles.SetTile(point1 + 1, point2 + 1, currentColor);
+
+                                    topofTheMorning();
+
+
+                                    break;
+                                }
+
+                            case 3:
+                                {
+                                    grida[point1, point2] = 1;
+                                    grida[point1, point2 + 1] = 1;
+                                    grida[point1, point2 + 2] = 1;
+                                    grida[point1 + 1, point2 + 1] = 1;
+                                    gameTiles.SetTile(point1, point2, currentColor);
+                                    gameTiles.SetTile(point1, point2 + 1, currentColor);
+                                    gameTiles.SetTile(point1, point2 + 2, currentColor);
+                                    gameTiles.SetTile(point1 + 1, point2 + 1, currentColor);
+
+                                    topofTheMorning();
+                                    break;
+                                }
+                            default:
+                                {
+                                    grida[point1, point2 + 2] = 1;
+                                    grida[point1 + 1, point2 + 2] = 1;
+                                    grida[point1 + 2, point2 + 2] = 1;
+                                    grida[point1 + 1, point2 + 1] = 1;
+                                    gameTiles.SetTile(point1, point2 + 2, currentColor);
+                                    gameTiles.SetTile(point1 + 1, point2 + 2, currentColor);
+                                    gameTiles.SetTile(point1 + 2, point2 + 2, currentColor);
+                                    gameTiles.SetTile(point1 + 1, point2 + 1, currentColor);
+
+                                    topofTheMorning();
+                                    break;
+                                }
+                        }
+                        break;
+                    case 2:
+                        {
+                        switch (map)
+                        {
+                                case 1:
+                                    {
+                                        grida[point1, point2] = 1;
+                                        grida[point1, point2 + 1] = 1;
+                                        grida[point1, point2 + 2] = 1;
+
+
+                                        gameTiles.SetTile(point1, point2, currentColor);
+                                        gameTiles.SetTile(point1, point2 + 1, currentColor);
+                                        gameTiles.SetTile(point1, point2 + 2, currentColor);
+
+
+                                        break;
+                                    }
+                                case 2:
+                                    {
+                                        grida[point1, point2] = 1;
+                                        grida[point1+1, point2] = 1;
+                                        grida[point1+2, point2] = 1;
+
+
+                                        gameTiles.SetTile(point1, point2, currentColor);
+                                        gameTiles.SetTile(point1+1, point2, currentColor);
+                                        gameTiles.SetTile(point1+2, point2, currentColor);
+                                        break;
+                                    }
+                                case 3:
+                                    {
+
+                                        break;
+                                    }
+                                default:
+                                    {
+
+                                        break;
+                                    }
+
+
+                            }
+                        }
+                            break;
+                    case 3:
+
+
+                        break;
+                    case 4:
+
+
+                        break;
+                    case 5:
+
+
+                        break;
+                    case 6:
+
+
+                        break;
+                    case 7:
+
+
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            Boolean freetoTurn()
+            {
+                int t1 = (int)drop.X / blockSize;
+                int t2 = (int)drop.Y / blockSize;
+                try
+                {
+                    if (grida[t1, t2] + grida[t1, t2 + 1] + grida[t1, t2 + 2] + grida[t1 + 1, t2] + grida[t1 + 1, t2 + 1] + grida[t1 + 1, t2 + 2] + grida[t1 + 2, t2] + grida[t1 + 2, t2 + 1] + grida[t1 + 2, t2 + 2] == 0)
+                        return true;
+
+                    else return false;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+
+
+            void rotateNow()
+            {
+
+            }
+            
+           void clearTheLine()
+            {
+                for (int i = 0; i < 10; ++i)
+                {
+                    for (int x = 0; x < 20; ++x)
+                    {
+                       
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    class Background : Entity
+    {
+
+        public Background()
+        {
+            Image backDrop = new Image("c:\\users\\calvin\\documents\\visual studio 2017\\Projects\\otterConversion\\otterConversion\\obj\\images\\background.png");
+
+            AddGraphic(backDrop);
+        }
+    }
+
+
+}
